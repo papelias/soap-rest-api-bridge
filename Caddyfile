@@ -1,0 +1,22 @@
+{
+	admin off
+	skip_install_trust
+	servers {
+		protocols h1 h2
+		timeouts {
+			read_header 5s
+			read_body 10s
+		}
+	}
+}
+
+https://{$DEMO_HOST} {
+	basic_auth {
+		import .demo-users
+	}
+
+	reverse_proxy 127.0.0.1:8000 {
+		header_up -Authorization
+		header_up X-Demo-User {http.auth.user.id}
+	}
+}

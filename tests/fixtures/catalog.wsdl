@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:tns="urn:catalog-test"
+                  targetNamespace="urn:catalog-test">
+  <wsdl:types>
+    <xs:schema targetNamespace="urn:catalog-test" elementFormDefault="qualified">
+      <xs:complexType name="CountryInfo">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string"/>
+          <xs:element name="capital" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ErrorDetail">
+        <xs:sequence>
+          <xs:element name="code" type="xs:int"/>
+          <xs:element name="reason" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ServiceFault" type="tns:ErrorDetail"/>
+      <xs:element name="CapitalCity">
+        <xs:complexType><xs:sequence>
+          <xs:element name="sCountryISOCode" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="CapitalCityResponse">
+        <xs:complexType><xs:sequence>
+          <xs:element name="CapitalCityResult" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="FullCountryInfo">
+        <xs:complexType><xs:sequence>
+          <xs:element name="sCountryISOCode" type="xs:string"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="FullCountryInfoResponse">
+        <xs:complexType><xs:sequence>
+          <xs:element name="FullCountryInfoResult" type="tns:CountryInfo"/>
+        </xs:sequence></xs:complexType>
+      </xs:element>
+      <xs:element name="Ping"><xs:complexType/></xs:element>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="CapitalInput">
+    <wsdl:part name="parameters" element="tns:CapitalCity"/>
+  </wsdl:message>
+  <wsdl:message name="CapitalOutput">
+    <wsdl:part name="parameters" element="tns:CapitalCityResponse"/>
+  </wsdl:message>
+  <wsdl:message name="CountryInput">
+    <wsdl:part name="parameters" element="tns:FullCountryInfo"/>
+  </wsdl:message>
+  <wsdl:message name="CountryOutput">
+    <wsdl:part name="parameters" element="tns:FullCountryInfoResponse"/>
+  </wsdl:message>
+  <wsdl:message name="ErrorMessage">
+    <wsdl:part name="detail" element="tns:ServiceFault"/>
+  </wsdl:message>
+  <wsdl:message name="PingInput">
+    <wsdl:part name="parameters" element="tns:Ping"/>
+  </wsdl:message>
+  <wsdl:message name="MultipleParts">
+    <wsdl:part name="zCount" type="xs:int"/>
+    <wsdl:part name="aName" type="xs:string"/>
+  </wsdl:message>
+  <wsdl:portType name="CountryPort">
+    <wsdl:operation name="Ping"><wsdl:input message="tns:PingInput"/></wsdl:operation>
+    <wsdl:operation name="FullCountryInfo">
+      <wsdl:input message="tns:CountryInput"/>
+      <wsdl:output message="tns:CountryOutput"/>
+      <wsdl:fault name="Unavailable" message="tns:ErrorMessage">
+        <wsdl:documentation>The service is unavailable.</wsdl:documentation>
+      </wsdl:fault>
+      <wsdl:fault name="InvalidCode" message="tns:ErrorMessage"/>
+    </wsdl:operation>
+    <wsdl:operation name="CapitalCity">
+      <wsdl:input message="tns:CapitalInput"/>
+      <wsdl:output message="tns:CapitalOutput"/>
+    </wsdl:operation>
+    <wsdl:operation name="MultipleParts">
+      <wsdl:input message="tns:MultipleParts"/>
+      <wsdl:output message="tns:MultipleParts"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="OtherPort">
+    <wsdl:operation name="CapitalCity">
+      <wsdl:input message="tns:MultipleParts"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CountrySoap11" type="tns:CountryPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="CapitalCity">
+      <soap:operation soapAction="urn:CapitalCity"/>
+      <wsdl:input><soap:body use="literal"/></wsdl:input>
+      <wsdl:output><soap:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="CountrySoap12" type="tns:CountryPort">
+    <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="CapitalCity">
+      <soap12:operation soapAction="urn:CapitalCity"/>
+      <wsdl:input><soap12:body use="literal"/></wsdl:input>
+      <wsdl:output><soap12:body use="literal"/></wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+</wsdl:definitions>

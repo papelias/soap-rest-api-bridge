@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <FullCountryInfoResponse xmlns="http://www.oorsprong.org/websamples.countryinfo">
+      <FullCountryInfoResult>
+        <sISOCode>PH</sISOCode>
+        <sName>Philippines</sName>
+        <sCapitalCity>Manila</sCapitalCity>
+        <sPhoneCode>63</sPhoneCode>
+        <sContinentCode>AS</sContinentCode>
+        <sCurrencyISOCode>PHP</sCurrencyISOCode>
+        <sCountryFlag>http://www.oorsprong.org/WebSamples.CountryInfo/Flags/Philippines.jpg</sCountryFlag>
+        <Languages>
+          <tLanguage><sISOCode>fil</sISOCode><sName>Filipino</sName></tLanguage>
+          <tLanguage><sISOCode>eng</sISOCode><sName>English</sName></tLanguage>
+        </Languages>
+      </FullCountryInfoResult>
+    </FullCountryInfoResponse>
+  </soap:Body>
+</soap:Envelope>

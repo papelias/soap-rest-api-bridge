@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <CountriesUsingCurrencyResponse xmlns="http://www.oorsprong.org/websamples.countryinfo">
+      <CountriesUsingCurrencyResult>
+        <tCountryCodeAndName><sISOCode>PH</sISOCode><sName>Philippines</sName></tCountryCodeAndName>
+        <tCountryCodeAndName><sISOCode>ZZ</sISOCode><sName>Fixture country</sName></tCountryCodeAndName>
+      </CountriesUsingCurrencyResult>
+    </CountriesUsingCurrencyResponse>
+  </soap:Body>
+</soap:Envelope>

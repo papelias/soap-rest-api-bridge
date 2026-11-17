@@ -1,0 +1,207 @@
+{
+  "operations": [
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CapitalCity",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sISOCurrencyCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CountriesUsingCurrency",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCountryCodeAndName",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CountryCurrency",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}tCurrency",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CountryFlag",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryName",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CountryISOCode",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CountryIntPhoneCode",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CountryName",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCurrencyISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "CurrencyName",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sCountryISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "FullCountryInfo",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}tCountryInfo",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "FullCountryInfoAllCountries",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCountryInfo",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sLanguageName",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "LanguageISOCode",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [
+        {
+          "name": "sISOCode",
+          "type": "{http://www.w3.org/2001/XMLSchema}string"
+        }
+      ],
+      "name": "LanguageName",
+      "output_type": "{http://www.w3.org/2001/XMLSchema}string",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfContinentsByCode",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftContinent",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfContinentsByName",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftContinent",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfCountryNamesByCode",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCountryCodeAndName",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfCountryNamesByName",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCountryCodeAndName",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfCountryNamesGroupedByContinent",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCountryCodeAndNameGroupedByContinent",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfCurrenciesByCode",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCurrency",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfCurrenciesByName",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftCurrency",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfLanguagesByCode",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftLanguage",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    },
+    {
+      "faults": [],
+      "input_parameters": [],
+      "name": "ListOfLanguagesByName",
+      "output_type": "{http://www.oorsprong.org/websamples.countryinfo}ArrayOftLanguage",
+      "port_type": "{http://www.oorsprong.org/websamples.countryinfo}CountryInfoServiceSoapType"
+    }
+  ],
+  "wsdl_url": "http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL"
+}

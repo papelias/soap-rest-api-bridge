@@ -1,0 +1,19 @@
+{
+  "label": "baseline",
+  "started_at_utc": "2026-11-01T04:53:21.408889+00:00",
+  "dataset_sha256": "aadda3f50636a86cd2a76467c53ad736bcd6e130bc628feedd593e7efb0c6c78",
+  "source_sha256": "0d7a82b23769b9a39985e2557427f7e09ad16c4148b0792604672c5f1561d648",
+  "catalog_sha256": "0427968ef7ecd0cf59a3ffbd4c21a9be4f18f0c5ed7dbf0767260c79c20a588b",
+  "router_model": "claude-haiku-5-5",
+  "answer_model": "claude-haiku-5-5",
+  "allowed_operations": [
+    "CapitalCity",
+    "CountryCurrency",
+    "CountryIntPhoneCode",
+    "FullCountryInfo",
+    "CountriesUsingCurrency"
+  ],
+  "case_count": 37,
+  "mode": "live_models_and_live_rest_facade",
+  "facade_timeout_seconds": 30
+}
