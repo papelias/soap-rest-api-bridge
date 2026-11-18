@@ -16,7 +16,7 @@ from zeep.transports import AsyncTransport
 from soap_rest_ai.config import Settings
 from soap_rest_ai.codes import normalize_code
 from soap_rest_ai.soap.errors import SoapErrorKind, SoapIntegrationError
-from soap_rest_ai.soap.wsdl import https_url, load_wsdl, wsdl_url, xml_settings
+from soap_rest_ai.soap.wsdl import PUBLIC_HTTP_SOAP, https_url, load_wsdl, wsdl_url, xml_settings
 
 JsonValue: TypeAlias = (
     str | int | float | bool | None | list["JsonValue"] | dict[str, "JsonValue"]
@@ -50,7 +50,10 @@ class _SoapTransport(AsyncTransport):
     async def post(
         self, address: str, message: bytes, headers: dict[str, str]
     ) -> httpx.Response:
-        url = https_url(address)
+        if self._endpoint is not None and address == str(self._endpoint):
+            url = self._endpoint
+        else:
+            url = https_url(address)
         if self._endpoint is not None:
             allowed = url == self._endpoint
         else:
@@ -143,12 +146,19 @@ class CountryInfoAdapter:
 
     async def _create_client(self) -> AsyncClient:
         source = self._settings.soap_wsdl_url
-        remote = wsdl_url(source)
+        allow_http = self._settings.soap_allow_public_http_demo
+        remote = wsdl_url(source, allow_public_http_demo=allow_http)
         configured_endpoint = self._settings.soap_endpoint_url
-        endpoint = https_url(configured_endpoint) if configured_endpoint else None
+        if remote is not None and remote.scheme == "http":
+            if configured_endpoint not in {"", PUBLIC_HTTP_SOAP}:
+                raise ValueError("The HTTP demo requires the exact public SOAP endpoint.")
+            # The unencrypted WSDL cannot select a different request destination.
+            endpoint = httpx.URL(PUBLIC_HTTP_SOAP)
+        else:
+            endpoint = https_url(configured_endpoint) if configured_endpoint else None
         if remote is None and endpoint is None:
             raise ValueError("A local WSDL requires an explicitly configured SOAP endpoint.")
-        document = await load_wsdl(source, self._http)
+        document = await load_wsdl(source, self._http, allow_public_http_demo=allow_http)
         return AsyncClient(
             document, transport=_SoapTransport(self._http, remote, endpoint),
             settings=document.settings,

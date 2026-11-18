@@ -6,8 +6,8 @@ from typing import Any
 import httpx
 
 from soap_rest_ai.nl.errors import NaturalLanguageError
-from soap_rest_ai.nl.execution import REST_ENDPOINTS
 from soap_rest_ai.nl.models import Provenance
+from soap_rest_ai.rest_endpoints import REST_ENDPOINTS
 
 
 async def fetch_facade_result(

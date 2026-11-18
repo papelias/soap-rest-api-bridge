@@ -10,6 +10,9 @@ from zeep import Settings
 from zeep.transports import Transport
 from zeep.wsdl import Document
 
+PUBLIC_HTTP_SOAP = "http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso"
+PUBLIC_HTTP_WSDL = f"{PUBLIC_HTTP_SOAP}?WSDL"
+
 
 def https_url(value: str) -> httpx.URL:
     url = httpx.URL(value)
@@ -18,7 +21,9 @@ def https_url(value: str) -> httpx.URL:
     return url
 
 
-def wsdl_url(source: str) -> httpx.URL | None:
+def wsdl_url(source: str, *, allow_public_http_demo: bool = False) -> httpx.URL | None:
+    if allow_public_http_demo and source == PUBLIC_HTTP_WSDL:
+        return httpx.URL(source)
     if Path(source).drive or not urlsplit(source).scheme:
         return None
     return https_url(source)
@@ -34,8 +39,10 @@ class _SelfContainedWsdl(Transport):
         raise ValueError("External WSDL and XSD imports are disabled.")
 
 
-async def load_wsdl(source: str, http: httpx.AsyncClient) -> Document:
-    remote = wsdl_url(source)
+async def load_wsdl(
+    source: str, http: httpx.AsyncClient, *, allow_public_http_demo: bool = False,
+) -> Document:
+    remote = wsdl_url(source, allow_public_http_demo=allow_public_http_demo)
     if remote is None:
         path = Path(source)
         if source.startswith("//") or path.drive.startswith("\\\\"):

@@ -15,6 +15,7 @@ dependencies = [
     "zeep>=4.3.3",
     "anthropic",
     "pydantic-settings",
+    "mcp>=1.30,<2",
 ]
 
 [dependency-groups]

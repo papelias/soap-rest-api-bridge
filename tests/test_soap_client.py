@@ -23,6 +23,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 NAMESPACE = "{http://www.oorsprong.org/websamples.countryinfo}"
 SOAP_HOST = "webservices.oorsprong.org"
 SOAP_URL = f"https://{SOAP_HOST}/websamples.countryinfo/CountryInfoService.wso"
+PUBLIC_HTTP_SOAP = SOAP_URL.replace("https:", "http:")
 
 
 @pytest.fixture
@@ -374,6 +375,59 @@ async def test_unsafe_wsdl_sources_are_rejected(settings: Settings, source: str)
         with pytest.raises(SoapIntegrationError) as error:
             await adapter.capital_city("PH")
     assert not error.value.retryable
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("allow_http", "source", "endpoint"), [
+    (False, PUBLIC_HTTP_SOAP + "?WSDL", ""),
+    (True, "http://unapproved.test/service?WSDL", ""),
+    (True, PUBLIC_HTTP_SOAP + "?WSDL&other=1", ""),
+    (True, PUBLIC_HTTP_SOAP + "?WSDL", "https://unapproved.test/service"),
+])
+async def test_public_http_demo_rejects_other_configurations(
+    settings: Settings, allow_http: bool, source: str, endpoint: str,
+) -> None:
+    settings.soap_allow_public_http_demo = allow_http
+    settings.soap_wsdl_url = source
+    settings.soap_endpoint_url = endpoint
+    async with CountryInfoAdapter(settings) as adapter:
+        with pytest.raises(SoapIntegrationError) as error:
+            await adapter.capital_city("PH")
+    assert error.value.kind == SoapErrorKind.VALIDATION_SERIALIZATION
+    assert not error.value.retryable
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("scenario", ["success", "other address", "WSDL redirect", "SOAP redirect"])
+async def test_public_http_demo_pins_both_requests(settings: Settings, scenario: str) -> None:
+    settings.soap_allow_public_http_demo = True
+    settings.soap_wsdl_url = PUBLIC_HTTP_SOAP + "?WSDL"
+    settings.soap_endpoint_url = ""
+    snapshot = (FIXTURES / "countryinfo.wsdl").read_bytes()
+    if scenario == "other address":
+        snapshot = snapshot.replace(PUBLIC_HTTP_SOAP.encode(), (PUBLIC_HTTP_SOAP + "/other").encode())
+    requests = []
+    redirect = httpx.Response(307, headers={"Location": "http://unapproved.test/service"})
+
+    def handle(request: httpx.Request) -> httpx.Response:
+        requests.append((request.method, str(request.url)))
+        if request.method == "GET":
+            return redirect if scenario == "WSDL redirect" else httpx.Response(200, content=snapshot)
+        return redirect if scenario == "SOAP redirect" else response("capital_city.xml")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handle), follow_redirects=True) as http:
+        async with CountryInfoAdapter(settings, http_client=http) as adapter:
+            if scenario == "success":
+                assert await adapter.capital_city("PH") == "Manila"
+            else:
+                with pytest.raises(SoapIntegrationError) as error:
+                    await adapter.capital_city("PH")
+                assert not error.value.retryable
+
+    expected = [("GET", settings.soap_wsdl_url)]
+    if scenario in {"success", "SOAP redirect"}:
+        expected.append(("POST", PUBLIC_HTTP_SOAP))
+    assert requests == expected
 
 
 @pytest.mark.asyncio
