@@ -17,6 +17,7 @@ A Python 3.11 service that exposes five read-only operations from the public Cou
 - [Testing](#testing)
 - [Configuration](#configuration)
 - [APIs and Interfaces](#apis-and-interfaces)
+- [MCP Server and Five-Tool Demo](#mcp-server-and-five-tool-demo)
 - [Deployment Architecture](#deployment-architecture)
 - [Troubleshooting](#troubleshooting)
 - [Development Guidelines](#development-guidelines)
@@ -32,6 +33,7 @@ Use the REST API to look up a country's capital, currency, phone code, or full r
 
 - **API and runtime** — FastAPI and Uvicorn on Python 3.11, with Pydantic Settings for configuration.
 - **Integrations** — Zeep for WSDL and SOAP parsing, HTTPX for async HTTP, and the Anthropic Python SDK for the natural-language workflow.
+- **MCP** — The official Python MCP SDK serves the five facade lookups over stdio.
 - **Development and deployment** — uv and Hatchling for dependency management and packaging, pytest and pytest-asyncio for tests, and Caddy for the optional HTTPS demo. [Project manifest](pyproject.toml), [lockfile](uv.lock), [Caddyfile](Caddyfile)
 
 ## High-Level Logical Architecture
@@ -39,6 +41,7 @@ Use the REST API to look up a country's capital, currency, phone code, or full r
 ```mermaid
 flowchart LR
     CALLER["HTTP caller"]
+    MCP_CLIENT["MCP client"] -->|stdio| MCP["Standalone MCP server"]
     subgraph APP["FastAPI application"]
         HEALTH["Health route"]
         ASK["Natural-language service"]
@@ -53,6 +56,7 @@ flowchart LR
     CALLER --> HEALTH
     CALLER --> ASK
     CALLER --> REST
+    MCP -->|HTTP GET| REST
     ASK --> CAT
     ASK -->|propose and summarize| MODEL
     ASK -->|validate operation| POLICY
@@ -67,6 +71,7 @@ flowchart LR
 | Component | Responsibility | Source |
 | --- | --- | --- |
 | HTTP API and lifespan | Registers health, REST, and `/ask` routes and manages integration clients | [main.py](src/soap_rest_ai/main.py), [api/](src/soap_rest_ai/api) |
+| MCP server | Validates tool input, calls the REST facade, and returns typed results over stdio | [mcp_server.py](src/soap_rest_ai/mcp_server.py) |
 | Natural-language service | Requests an operation, validates its inputs, calls the facade, and builds the answer response | [nl/](src/soap_rest_ai/nl) |
 | Policy | Enforces the fixed allowlist and any narrower configured subset | [operations.py](src/soap_rest_ai/policy/operations.py) |
 | SOAP adapter | Loads and checks the WSDL, calls the approved service endpoint, and normalizes SOAP results | [soap/](src/soap_rest_ai/soap) |
@@ -152,8 +157,9 @@ The app reads environment variables and an optional `.env` file. Keep credential
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `SOAP_WSDL_URL` | Empty | HTTPS WSDL URL or trusted local WSDL path |
-| `SOAP_ENDPOINT_URL` | Empty | Exact HTTPS SOAP address from the WSDL. Required for a local WSDL. With a remote WSDL and no override, the SOAP address must share its HTTPS origin. |
+| `SOAP_WSDL_URL` | Empty | HTTPS WSDL URL or trusted local WSDL path. The public demo opt-in also accepts its exact HTTP WSDL URL. |
+| `SOAP_ENDPOINT_URL` | Empty | Exact SOAP address from the WSDL. Required for a local WSDL. A remote HTTPS WSDL defaults to its own HTTPS origin. The HTTP demo pins the exact public SOAP endpoint. |
+| `SOAP_ALLOW_PUBLIC_HTTP_DEMO` | `false` | Allow the two pinned HTTP URLs for the public CountryInfoService demo |
 | `SOAP_TIMEOUT_SECONDS` | `10` | HTTP timeout per phase |
 | `SOAP_MAX_RETRIES` | `1` | Additional attempts for eligible transient SOAP failures |
 | `FACADE_BASE_URL` | `http://127.0.0.1:8000` | Base URL for the natural-language service's HTTP calls to the facade |
@@ -184,6 +190,42 @@ Invoke-RestMethod http://127.0.0.1:8000/countries/JP/capital
 $body = @{ question = 'What is the capital of Japan?' } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/ask -ContentType 'application/json' -Body $body
 ```
+
+## MCP Server and Five-Tool Demo
+
+The MCP client starts a separate process from the repository root with this command.
+
+```sh
+uv run python -m soap_rest_ai.mcp_server
+```
+
+The server reads `MCP_FACADE_BASE_URL` from its process environment. It defaults to `http://127.0.0.1:8000`. Set it in the MCP client's launch environment if FastAPI uses another address. The MCP server can initialize and list tools while FastAPI is offline. It reuses one async HTTP client for tool calls and closes it on shutdown. Stdout carries MCP messages and logs go to stderr.
+
+Each tool trims its input, checks for two ASCII letters for a country code or three for a currency code, and sends an uppercase code via a fixed REST GET route. The facade determines the lookup result. Each structured result and its JSON text equivalent contain `success`, the SOAP `operation`, the normalized `input` object, and `data` from the corresponding REST result field. A successful lookup can return `data: null`. Failures set `isError: true`, return `data: null`, and include an `error` with a stable `code` and a sanitized `message`. Locally rejected input is represented by `input: null`. [Python MCP SDK result handling](https://github.com/modelcontextprotocol/python-sdk/blob/v1.30.0/src/mcp/server/lowlevel/server.py)
+
+There are at most two HTTP attempts, with a three-second limit per attempt and a seven-second deadline that includes the retry wait. Transient connection errors, timeouts, and eligible HTTP 502, 503, and 504 responses retry after 250 ms. Facade error metadata can stop retries, including for SOAP faults. Direct and upstream HTTP 429 responses require a valid `Retry-After` that leaves time for another attempt. The wait is at least 250 ms. The current facade reports SOAP upstream 429 in its error metadata without forwarding the SOAP response's `Retry-After`, so those calls return a rate-limit error immediately.
+
+1. Start FastAPI from the repository root with the public CountryInfoService HTTP demo enabled. The WSDL and SOAP messages travel in plaintext in this mode, so a network intermediary could read or alter them. Use this mode for the public-data demo.
+
+   ```powershell
+   $env:SOAP_ALLOW_PUBLIC_HTTP_DEMO = 'true'
+   $env:SOAP_WSDL_URL = 'http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso?WSDL'
+   $env:SOAP_ENDPOINT_URL = 'http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso'
+   uv run uvicorn soap_rest_ai.main:app --host 127.0.0.1 --port 8000
+   ```
+
+2. In a second terminal at the repository root, run `npx @modelcontextprotocol/inspector uv run python -m soap_rest_ai.mcp_server`. Connect over STDIO and list tools. [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector)
+3. Call all five tools and inspect the structured results.
+
+   - `get_country_capital` with `{"country_code":" ph "}` reads `/countries/PH/capital` and returns the `capital` string.
+   - `get_country_currency` with `{"country_code":"PH"}` reads `/countries/PH/currency` and returns the `currency` object.
+   - `get_country_phone_code` with `{"country_code":"PH"}` reads `/countries/PH/phone-code` and returns the `phone_code` string.
+   - `get_country_info` with `{"country_code":"PH"}` reads `/countries/PH` and returns the `country` object.
+   - `get_countries_by_currency` with `{"currency_code":"PHP"}` reads `/currencies/PHP/countries` and returns the `countries` list.
+
+Run the offline MCP checks with `uv --offline run --frozen pytest tests/test_mcp_server.py -q`. The subprocess test discovers all five tools with the Python MCP client, then calls a tool over stdio against a loopback stub facade.
+
+**Live acceptance passed on 2026-11-17.** The Python MCP client discovered all five tools over stdio and verified all five results through local FastAPI and the public SOAP provider with the HTTP demo opt-in enabled. HTTPS probes to the provider reset during the TLS handshake.
 
 ## Deployment Architecture
 

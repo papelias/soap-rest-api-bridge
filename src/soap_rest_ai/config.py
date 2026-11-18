@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     anthropic_answer_model: str = ""
     soap_wsdl_url: str = ""
     soap_endpoint_url: str = ""
+    soap_allow_public_http_demo: bool = False
     soap_timeout_seconds: float = Field(default=10, gt=0)
     soap_max_retries: int = Field(default=1, ge=0)
     facade_base_url: str = "http://127.0.0.1:8000"
